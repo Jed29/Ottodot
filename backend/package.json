@@ -1,0 +1,18 @@
+{
+  "name": "ottodot-trial-booking",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ottodot trial class booking reliability slice",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node --env-file=.env src/server.js",
+    "dev": "node --watch --env-file=.env src/server.js",
+    "seed": "node --env-file=.env src/db/seed.js",
+    "test": "node --env-file=.env tests/run-tests.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "pg": "^8.11.5"
+  }
+}
