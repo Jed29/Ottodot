@@ -78,6 +78,18 @@ npm test
 This exercises every required edge case, including firing two concurrent payment
 confirmations at the literal last seat of a class and asserting exactly one wins.
 
+### 5. Run end-to-end tests (Playwright, drives a real Chromium browser)
+```bash
+cd backend && npm run seed   # start from a known DB state
+cd ../frontend
+npx playwright install chromium   # one-time browser download
+npm run test:e2e
+```
+Boots the backend (re-seeding first) and the Vite dev server automatically
+(`frontend/playwright.config.js`), then clicks through the real UI: pick a
+child, pick a class, book, pay (success and decline paths), and assert the
+roster panel reflects the outcome. See `frontend/tests/e2e/booking.spec.js`.
+
 ### API quick reference
 | Method | Path | Purpose |
 |---|---|---|
@@ -221,8 +233,9 @@ a delayed job), since it doesn't need to happen inline with any user request.
 - Frontend is deliberately scoped (class cards, a mock payment form, a step
   indicator, a roster panel — no routing, no global state management library,
   no loading skeletons) — verified via automated backend tests, curl through
-  the Vite dev proxy, and a headless-Chromium (Playwright) click-through of
-  the full book → pay success / pay decline → roster flow.
+  the Vite dev proxy, and a real Playwright/Chromium click-through of the full
+  book → pay success / pay decline → roster flow (`frontend/tests/e2e/`,
+  `npm run test:e2e` from `frontend/`).
 - No pagination/filtering on roster or class listing (fine at this data scale).
 - No idempotency key on the payment endpoint for retried client requests (the
   booking-state check — "must be `pending_payment`" — prevents double-confirming

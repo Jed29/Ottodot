@@ -48,3 +48,8 @@ surfacing at the end when running the full suite.
 - Started the server for real and manually hit each endpoint with curl.
 - Read through the transaction/locking code myself so I actually understand
   why it prevents the race condition, instead of just taking AI's word for it.
+- Added a real Playwright end-to-end test (`frontend/tests/e2e/booking.spec.js`)
+  that drives headless Chromium against the actual running app: pick a child,
+  pick a class, book, pay (once with success, once with a simulated decline),
+  then check the roster panel. Both cases pass against the real backend
+  and a real (re-seeded) database, not mocks.
