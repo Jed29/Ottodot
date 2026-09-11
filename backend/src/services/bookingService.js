@@ -91,33 +91,6 @@ async function createBooking({ studentId, classId }) {
   }
 }
 
-/**
- * Confirm (or fail) payment for a pending booking.
- *
- * This is the function that must be race-safe under the "last seat" scenario.
- *
- * Approach: pessimistic row locking.
- *   1. Start a DB transaction.
- *   2. `SELECT ... FOR UPDATE` the trial_classes row for this booking's class.
- *      This blocks any other concurrent payment-confirmation transaction for
- *      the SAME class until this one commits or rolls back — i.e. concurrent
- *      requests for the same class are serialized at this point.
- *   3. While holding the lock, count currently CONFIRMED bookings for the class.
- *   4. If count >= capacity -> reject this payment (class_full), even if the
- *      payment itself would have succeeded. Mark the booking payment_failed.
- *   5. Otherwise, run the mock payment. If it succeeds, flip booking to
- *      'confirmed' inside the same transaction (so the seat-count check other
- *      waiting transactions will see is already up to date once we commit).
- *      If it fails, flip booking to 'payment_failed' — no seat is consumed.
- *   6. Commit, releasing the lock for the next waiter.
- *
- * Why this approach: it's simple to reason about and test, needs no extra
- * infrastructure (no queue, no distributed lock), and Postgres already gives
- * us transactional row locking for free. The tradeoff is that concurrent
- * payment attempts for the *same class* are serialized (a brief queue at the
- * DB level) rather than parallelized — acceptable here because trial classes
- * are small (capacity 4) and payment confirmation is fast.
- */
 async function confirmPayment({ bookingId, simulate }) {
   const client = await pool.connect();
   try {
